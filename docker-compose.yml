@@ -1,0 +1,23 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: rental-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-rental}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rental}
+      POSTGRES_DB: ${POSTGRES_DB:-rental}
+    ports:
+      - '5432:5432'
+    volumes:
+      - rental_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-rental} -d ${POSTGRES_DB:-rental}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  
+
+volumes:
+  rental_pgdata:

@@ -1,0 +1,83 @@
+// Prisma schema for the rental apartment listing marketplace (middleman model).
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  TENANT
+  LANDLORD
+  ADMIN
+}
+
+enum ListingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  password         String // bcrypt hash
+  name             String
+  phone            String?
+  role             Role      @default(TENANT)
+  // Trusted-landlord flag: once Admin approves a landlord, their future
+  // listings are auto-approved (no per-listing review).
+  landlordApproved Boolean   @default(false)
+  listings         Listing[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model Listing {
+  id            String         @id @default(uuid())
+  // Human-friendly public reference number, starts at 1 and increments.
+  listingNumber Int            @unique @default(autoincrement())
+  title         String
+  rent          Int
+  location      String
+  description   String
+  status        ListingStatus  @default(PENDING)
+  landlord      User           @relation(fields: [landlordId], references: [id])
+  landlordId    String
+  images        ListingImage[]
+  enquiries     Enquiry[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([status])
+  @@index([landlordId])
+}
+
+model ListingImage {
+  id           String  @id @default(uuid())
+  url          String
+  thumbnailUrl String?
+  fileId       String // ImageKit fileId, used for deletion
+  listing      Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId    String
+  createdAt    DateTime @default(now())
+
+  @@index([listingId])
+}
+
+model Enquiry {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String
+  email     String?
+  message   String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId String
+  createdAt DateTime @default(now())
+
+  @@index([listingId])
+}
