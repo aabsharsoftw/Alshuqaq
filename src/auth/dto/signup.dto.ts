@@ -7,6 +7,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { LangCode } from '../../common/i18n/localize';
 
 /** Public self-signup is limited to TENANT or LANDLORD. Admins are seeded. */
 export enum SignupRole {
@@ -40,4 +41,9 @@ export class SignupDto {
   @ApiProperty({ enum: SignupRole, default: SignupRole.TENANT })
   @IsEnum(SignupRole)
   role: SignupRole;
+
+  @ApiPropertyOptional({ enum: LangCode, default: LangCode.EN })
+  @IsOptional()
+  @IsEnum(LangCode)
+  preferredLanguage?: LangCode;
 }

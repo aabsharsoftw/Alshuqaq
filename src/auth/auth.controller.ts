@@ -56,6 +56,7 @@ export class AuthController {
       phone: fresh!.phone,
       role: fresh!.role,
       landlordApproved: fresh!.landlordApproved,
+      preferredLanguage: fresh!.preferredLanguage,
       createdAt: fresh!.createdAt,
     };
   }

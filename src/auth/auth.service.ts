@@ -4,8 +4,9 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Role, User } from '@prisma/client';
+import { Language, Role, User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { toLanguageEnum } from '../common/i18n/localize';
 import { MailService } from '../mail/mail.service';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
@@ -35,6 +36,9 @@ export class AuthService {
       name: dto.name,
       phone: dto.phone,
       role: dto.role as Role,
+      ...(dto.preferredLanguage
+        ? { preferredLanguage: toLanguageEnum(dto.preferredLanguage) as Language }
+        : {}),
     });
 
     // Welcome email for tenants (best-effort, non-blocking).
@@ -77,6 +81,7 @@ export class AuthService {
       phone: user.phone,
       role: user.role,
       landlordApproved: user.landlordApproved,
+      preferredLanguage: user.preferredLanguage,
       createdAt: user.createdAt,
     };
   }

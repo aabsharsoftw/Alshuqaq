@@ -28,4 +28,7 @@ export const envValidationSchema = Joi.object({
   IMAGEKIT_PRIVATE_KEY: Joi.string().required(),
   IMAGEKIT_URL_ENDPOINT: Joi.string().uri().required(),
   IMAGEKIT_FOLDER: Joi.string().default('/rental-listings'),
+
+  LIBRETRANSLATE_URL: Joi.string().uri().default('http://localhost:5000'),
+  LIBRETRANSLATE_API_KEY: Joi.string().allow('').optional(),
 });

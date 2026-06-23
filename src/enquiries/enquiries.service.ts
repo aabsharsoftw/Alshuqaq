@@ -19,8 +19,8 @@ export class EnquiriesService {
       select: {
         id: true,
         listingNumber: true,
-        title: true,
-        location: true,
+        titleEn: true,
+        locationEn: true,
         rent: true,
       },
     });
@@ -38,16 +38,24 @@ export class EnquiriesService {
       },
     });
 
+    // Emails are sent in English; map the bilingual fields to a flat summary.
+    const summary = {
+      listingNumber: listing.listingNumber,
+      title: listing.titleEn,
+      location: listing.locationEn,
+      rent: listing.rent,
+    };
+
     // Notify admin (the middleman) and confirm to the tenant if we have email.
     this.mail.sendAdminNewEnquiry({
       name: dto.name,
       phone: dto.phone,
       email: dto.email,
       message: dto.message,
-      listing,
+      listing: summary,
     });
     if (dto.email) {
-      this.mail.sendEnquiryConfirmation(dto.email, dto.name, listing);
+      this.mail.sendEnquiryConfirmation(dto.email, dto.name, summary);
     }
 
     return {
@@ -67,7 +75,14 @@ export class EnquiriesService {
       this.prisma.enquiry.findMany({
         include: {
           listing: {
-            select: { id: true, listingNumber: true, title: true, location: true },
+            select: {
+              id: true,
+              listingNumber: true,
+              titleEn: true,
+              titleAr: true,
+              locationEn: true,
+              locationAr: true,
+            },
           },
         },
         orderBy: { createdAt: 'desc' },

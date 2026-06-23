@@ -36,6 +36,13 @@ async function bootstrap() {
     )
     .setVersion('1.0')
     .addBearerAuth()
+    .addGlobalParameters({
+      name: 'Accept-Language',
+      in: 'header',
+      required: false,
+      description: 'Response/content language',
+      schema: { type: 'string', enum: ['en', 'ar'], default: 'en' },
+    })
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, document);

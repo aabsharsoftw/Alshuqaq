@@ -22,6 +22,11 @@ enum ListingStatus {
   REJECTED
 }
 
+enum Language {
+  EN
+  AR
+}
+
 model User {
   id               String    @id @default(uuid())
   email            String    @unique
@@ -29,6 +34,7 @@ model User {
   name             String
   phone            String?
   role             Role      @default(TENANT)
+  preferredLanguage Language @default(EN)
   // Trusted-landlord flag: once Admin approves a landlord, their future
   // listings are auto-approved (no per-listing review).
   landlordApproved Boolean   @default(false)
@@ -41,10 +47,15 @@ model Listing {
   id            String         @id @default(uuid())
   // Human-friendly public reference number, starts at 1 and increments.
   listingNumber Int            @unique @default(autoincrement())
-  title         String
+  // Bilingual text. The landlord enters details in one language (en or ar);
+  // the backend auto-fills the other via the self-hosted LibreTranslate service.
+  titleEn       String
+  titleAr       String
   rent          Int
-  location      String
-  description   String
+  locationEn    String
+  locationAr    String
+  descriptionEn String
+  descriptionAr String
   status        ListingStatus  @default(PENDING)
   landlord      User           @relation(fields: [landlordId], references: [id])
   landlordId    String

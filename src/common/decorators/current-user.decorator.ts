@@ -5,6 +5,7 @@ export interface AuthUser {
   email: string;
   role: string;
   landlordApproved: boolean;
+  preferredLanguage: string;
 }
 
 /** Extracts the authenticated user (set by JwtStrategy) from the request. */

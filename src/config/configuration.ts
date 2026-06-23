@@ -31,4 +31,11 @@ export default () => ({
     urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT as string,
     folder: process.env.IMAGEKIT_FOLDER ?? '/rental-listings',
   },
+
+  libretranslate: {
+    // Base URL of the self-hosted LibreTranslate service.
+    url: process.env.LIBRETRANSLATE_URL ?? 'http://localhost:5000',
+    // Optional API key, only needed if the instance enforces one.
+    apiKey: process.env.LIBRETRANSLATE_API_KEY ?? '',
+  },
 });

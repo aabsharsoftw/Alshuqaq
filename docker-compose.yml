@@ -17,7 +17,25 @@ services:
       timeout: 5s
       retries: 10
 
-  
+  libretranslate:
+    image: libretranslate/libretranslate:latest
+    container_name: rental-libretranslate
+    restart: unless-stopped
+    environment:
+      # Only download the language models we need (saves disk + boot time).
+      LT_LOAD_ONLY: 'en,ar'
+      # API served headless; no public web UI.
+      LT_DISABLE_WEB_UI: 'true'
+    ports:
+      - '5000:5000'
+    healthcheck:
+      test:
+        ['CMD-SHELL', "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:5000/languages')\""]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      # Models download on first boot, which can take a while.
+      start_period: 120s
 
 volumes:
   rental_pgdata:

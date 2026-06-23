@@ -22,10 +22,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
+import { AcceptLanguage } from '../common/decorators/accept-language.decorator';
 import {
   AuthUser,
   CurrentUser,
 } from '../common/decorators/current-user.decorator';
+import { Lang } from '../common/i18n/localize';
 import { Public } from '../common/decorators/public.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CreateListingDto } from './dto/create-listing.dto';
@@ -46,7 +48,10 @@ export class ListingsController {
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiOperation({
-    summary: 'Create a listing (LANDLORD). Auto-approved for trusted landlords',
+    summary:
+      'Create a listing (LANDLORD). Details are taken in the request language ' +
+      '(Accept-Language: en|ar) and auto-translated to the other. ' +
+      'Auto-approved for trusted landlords',
   })
   @ApiBody({
     schema: {
@@ -72,6 +77,7 @@ export class ListingsController {
   create(
     @CurrentUser() user: AuthUser,
     @Body() dto: CreateListingDto,
+    @AcceptLanguage() lang: Lang,
     @UploadedFiles(
       new ParseFilePipe({
         validators: [
@@ -83,31 +89,37 @@ export class ListingsController {
     )
     files: Express.Multer.File[],
   ) {
-    return this.listingsService.create(user, dto, files);
+    return this.listingsService.create(user, dto, files, lang);
   }
 
   @Public()
   @Get()
-  @ApiOperation({ summary: 'Browse approved listings (public feed)' })
-  findAll(@Query() query: QueryListingsDto) {
-    return this.listingsService.findPublic(query);
+  @ApiOperation({
+    summary: 'Browse approved listings (public feed). Localized by Accept-Language',
+  })
+  findAll(@Query() query: QueryListingsDto, @AcceptLanguage() lang: Lang) {
+    return this.listingsService.findPublic(query, lang);
   }
 
   @Get('mine')
   @Roles(Role.LANDLORD)
   @ApiBearerAuth()
   @ApiOperation({ summary: "List the current landlord's own listings" })
-  findMine(@CurrentUser() user: AuthUser) {
-    return this.listingsService.findMine(user.id);
+  findMine(@CurrentUser() user: AuthUser, @AcceptLanguage() lang: Lang) {
+    return this.listingsService.findMine(user.id, lang);
   }
 
   @Public()
   @Get(':idOrNumber')
   @ApiOperation({
-    summary: 'Get an approved listing by UUID or listing number',
+    summary:
+      'Get an approved listing by UUID or listing number. Localized by Accept-Language',
   })
-  findOne(@Param('idOrNumber') idOrNumber: string) {
-    return this.listingsService.findOnePublic(idOrNumber);
+  findOne(
+    @Param('idOrNumber') idOrNumber: string,
+    @AcceptLanguage() lang: Lang,
+  ) {
+    return this.listingsService.findOnePublic(idOrNumber, lang);
   }
 
   @Patch(':id')
@@ -120,8 +132,9 @@ export class ListingsController {
     @Param('id') id: string,
     @CurrentUser() user: AuthUser,
     @Body() dto: UpdateListingDto,
+    @AcceptLanguage() lang: Lang,
   ) {
-    return this.listingsService.update(id, user, dto);
+    return this.listingsService.update(id, user, dto, lang);
   }
 
   @Delete(':id')

@@ -1,6 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, Role, User } from '@prisma/client';
+import { Language, Prisma, Role, User } from '@prisma/client';
+import { Lang, toLanguageEnum } from '../common/i18n/localize';
 import { PrismaService } from '../prisma/prisma.service';
+
+const publicUserSelect = {
+  id: true,
+  email: true,
+  name: true,
+  phone: true,
+  role: true,
+  landlordApproved: true,
+  preferredLanguage: true,
+  createdAt: true,
+} satisfies Prisma.UserSelect;
 
 @Injectable()
 export class UsersService {
@@ -38,15 +50,15 @@ export class UsersService {
     return this.prisma.user.update({
       where: { id },
       data: { landlordApproved: approved },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        phone: true,
-        role: true,
-        landlordApproved: true,
-        createdAt: true,
-      },
+      select: publicUserSelect,
+    });
+  }
+
+  setPreferredLanguage(id: string, lang: Lang) {
+    return this.prisma.user.update({
+      where: { id },
+      data: { preferredLanguage: toLanguageEnum(lang) as Language },
+      select: publicUserSelect,
     });
   }
 }

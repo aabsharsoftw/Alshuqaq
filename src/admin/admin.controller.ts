@@ -8,8 +8,10 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ListingStatus, Role } from '@prisma/client';
+import { AcceptLanguage } from '../common/decorators/accept-language.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { PaginationDto } from '../common/dto/pagination.dto';
+import { Lang } from '../common/i18n/localize';
 import { EnquiriesService } from '../enquiries/enquiries.service';
 import { ListingsService } from '../listings/listings.service';
 import { UsersService } from '../users/users.service';
@@ -29,27 +31,41 @@ export class AdminController {
 
   @Get('listings')
   @ApiOperation({ summary: 'List all listings, optionally filtered by status' })
-  listings(@Query() query: AdminListingsQueryDto) {
+  listings(
+    @Query() query: AdminListingsQueryDto,
+    @AcceptLanguage() lang: Lang,
+  ) {
     return this.listingsService.adminFindAll(
       query.status,
       query.page,
       query.limit,
+      lang,
     );
   }
 
   @Patch('listings/:id/approve')
   @ApiOperation({ summary: 'Approve a listing (notifies the landlord)' })
-  approveListing(@Param('id') id: string) {
-    return this.listingsService.setStatus(id, ListingStatus.APPROVED);
+  approveListing(@Param('id') id: string, @AcceptLanguage() lang: Lang) {
+    return this.listingsService.setStatus(
+      id,
+      ListingStatus.APPROVED,
+      undefined,
+      lang,
+    );
   }
 
   @Patch('listings/:id/reject')
   @ApiOperation({ summary: 'Reject a listing (notifies the landlord)' })
-  rejectListing(@Param('id') id: string, @Body() dto: RejectListingDto) {
+  rejectListing(
+    @Param('id') id: string,
+    @Body() dto: RejectListingDto,
+    @AcceptLanguage() lang: Lang,
+  ) {
     return this.listingsService.setStatus(
       id,
       ListingStatus.REJECTED,
       dto.reason,
+      lang,
     );
   }
 
