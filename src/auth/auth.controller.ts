@@ -14,6 +14,7 @@ import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/signup.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -25,14 +26,29 @@ export class AuthController {
 
   @Public()
   @Post('signup')
+  @HttpCode(200)
   @ApiOperation({
-    summary: 'Register a new TENANT or LANDLORD account',
+    summary: 'Start registration for a new TENANT or LANDLORD account',
     description:
-      'Returns a JWT access token. Tenants receive a welcome email. ' +
-      'Logout is handled client-side by discarding the token.',
+      'Step 1 of 2. Emails a 6-digit verification code (valid 10 minutes) and ' +
+      'stores the details until verified. No account is created yet — call ' +
+      'POST /auth/verify-otp with the code to finish.',
   })
   signup(@Body() dto: SignupDto) {
-    return this.authService.signup(dto);
+    return this.authService.requestRegistrationOtp(dto);
+  }
+
+  @Public()
+  @Post('verify-otp')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Verify the email OTP and create the account',
+    description:
+      'Step 2 of 2. On success the account is created and a JWT access token ' +
+      'is returned. Tenants receive a welcome email.',
+  })
+  verifyOtp(@Body() dto: VerifyOtpDto) {
+    return this.authService.verifyRegistrationOtp(dto);
   }
 
   @Public()

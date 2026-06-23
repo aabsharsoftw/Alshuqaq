@@ -43,6 +43,25 @@ model User {
   updatedAt        DateTime  @updatedAt
 }
 
+// Holds a pending registration until its email OTP is verified. The real User
+// row is only created on successful verification, so unverified signups never
+// occupy the User table. Keyed by email so re-requesting an OTP overwrites the
+// previous attempt.
+model RegistrationOtp {
+  id                String   @id @default(uuid())
+  email             String   @unique
+  codeHash          String // bcrypt hash of the 6-digit OTP
+  name              String
+  passwordHash      String // bcrypt hash of the chosen password
+  phone             String?
+  role              Role
+  preferredLanguage Language @default(EN)
+  attempts          Int      @default(0)
+  expiresAt         DateTime
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
 model Listing {
   id            String         @id @default(uuid())
   // Human-friendly public reference number, starts at 1 and increments.

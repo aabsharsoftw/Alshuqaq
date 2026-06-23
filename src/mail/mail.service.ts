@@ -38,6 +38,19 @@ export class MailService {
     }
   }
 
+  sendRegistrationOtp(email: string, name: string, code: string) {
+    return this.send(
+      email,
+      'Your Rental App verification code',
+      `<p>Hi ${name},</p>
+       <p>Use the following code to complete your registration:</p>
+       <p style="font-size:24px;font-weight:bold;letter-spacing:4px">${code}</p>
+       <p>This code expires in 10 minutes. If you didn't request it, you can
+       safely ignore this email.</p>
+       <p>The Rental App Team</p>`,
+    );
+  }
+
   sendTenantWelcome(email: string, name: string) {
     return this.send(
       email,
