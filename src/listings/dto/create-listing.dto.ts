@@ -1,6 +1,14 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsInt, IsString, MaxLength, Min, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
+import {
+  IsBoolean,
+  IsInt,
+  IsOptional,
+  IsString,
+  MaxLength,
+  Min,
+  MinLength,
+} from 'class-validator';
 
 export class CreateListingDto {
   @ApiProperty({ example: 'Spacious 2BHK near the park' })
@@ -26,4 +34,17 @@ export class CreateListingDto {
   @MinLength(10)
   @MaxLength(5000)
   description: string;
+
+  @ApiPropertyOptional({
+    example: false,
+    description: 'Save as draft (not submitted for review). Defaults to false.',
+  })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
+  @IsBoolean()
+  isDraft?: boolean;
 }

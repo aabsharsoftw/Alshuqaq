@@ -62,6 +62,11 @@ export class ListingsController {
         rent: { type: 'number' },
         location: { type: 'string' },
         description: { type: 'string' },
+        isDraft: {
+          type: 'boolean',
+          default: false,
+          description: 'Save as draft without submitting for review',
+        },
         images: {
           type: 'array',
           items: { type: 'string', format: 'binary' },

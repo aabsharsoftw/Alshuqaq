@@ -52,10 +52,11 @@ export class ListingsService {
       lang,
     );
 
-    // Trusted-landlord rule: auto-approve future listings once approved.
-    const status = landlord.landlordApproved
-      ? ListingStatus.APPROVED
-      : ListingStatus.PENDING;
+    const status = dto.isDraft
+      ? ListingStatus.DRAFT
+      : landlord.landlordApproved
+        ? ListingStatus.APPROVED
+        : ListingStatus.PENDING;
 
     const listing = await this.prisma.listing.create({
       data: {
@@ -172,6 +173,12 @@ export class ListingsService {
       );
       data.descriptionEn = en;
       data.descriptionAr = ar;
+    }
+
+    if (dto.isDraft === false && listing.status === ListingStatus.DRAFT) {
+      data.status = user.landlordApproved
+        ? ListingStatus.APPROVED
+        : ListingStatus.PENDING;
     }
 
     const updated = await this.prisma.listing.update({

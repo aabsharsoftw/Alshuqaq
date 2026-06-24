@@ -17,6 +17,7 @@ enum Role {
 }
 
 enum ListingStatus {
+  DRAFT
   PENDING
   APPROVED
   REJECTED
