@@ -51,6 +51,20 @@ export class MailService {
     );
   }
 
+  sendPasswordReset(email: string, name: string, code: string) {
+    return this.send(
+      email,
+      'Reset your Rental App password',
+      `<p>Hi ${name},</p>
+       <p>We received a request to reset your password. Use the following code
+       to continue:</p>
+       <p style="font-size:24px;font-weight:bold;letter-spacing:4px">${code}</p>
+       <p>This code expires in 10 minutes. If you didn't request it, you can
+       safely ignore this email — your password stays unchanged.</p>
+       <p>The Rental App Team</p>`,
+    );
+  }
+
   sendTenantWelcome(email: string, name: string) {
     return this.send(
       email,

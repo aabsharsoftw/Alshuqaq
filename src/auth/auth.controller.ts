@@ -12,7 +12,10 @@ import {
 import { Public } from '../common/decorators/public.decorator';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
+import { ResendOtpDto } from './dto/resend-otp.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SignupDto } from './dto/signup.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
 
@@ -52,11 +55,63 @@ export class AuthController {
   }
 
   @Public()
+  @Post('otp/resend')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Resend the registration OTP for a pending signup',
+    description:
+      'Issues a fresh code (valid 10 minutes) and invalidates the previous ' +
+      'one. Only works while a signup is still awaiting verification.',
+  })
+  resendOtp(@Body() dto: ResendOtpDto) {
+    return this.authService.resendRegistrationOtp(dto.email);
+  }
+
+  @Public()
   @Post('login')
   @HttpCode(200)
   @ApiOperation({ summary: 'Log in with email and password' })
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Request a password-reset code',
+    description:
+      'Emails a one-time reset code if an account exists. Always returns the ' +
+      'same response so registered emails cannot be enumerated.',
+  })
+  forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto.email);
+  }
+
+  @Public()
+  @Post('reset-password')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Reset the password using the emailed code',
+    description:
+      'Verifies the code from POST /auth/forgot-password and sets the new ' +
+      'password. The code is single-use and expires after 10 minutes.',
+  })
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
+  }
+
+  @Post('logout')
+  @HttpCode(200)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Log out the current user',
+    description:
+      'JWTs are stateless, so this is a client-side token discard. The ' +
+      'endpoint confirms the action and exists for client convenience.',
+  })
+  logout() {
+    return { message: 'Logged out successfully.' };
   }
 
   @Get('me')

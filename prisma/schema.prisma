@@ -40,8 +40,35 @@ model User {
   // listings are auto-approved (no per-listing review).
   landlordApproved Boolean   @default(false)
   listings         Listing[]
+  savedListings    SavedListing[]
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+}
+
+// A tenant's bookmark of a listing. Uniquely keyed on (user, listing) so the
+// same listing can only be saved once per user.
+model SavedListing {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, listingId])
+  @@index([userId])
+}
+
+// Holds a pending password-reset code, keyed by email so re-requesting a reset
+// overwrites the previous attempt
+model PasswordResetOtp {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  codeHash  String // bcrypt hash of the 6-digit OTP
+  attempts  Int      @default(0)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // Holds a pending registration until its email OTP is verified. The real User
@@ -81,6 +108,7 @@ model Listing {
   landlordId    String
   images        ListingImage[]
   enquiries     Enquiry[]
+  savedBy       SavedListing[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
